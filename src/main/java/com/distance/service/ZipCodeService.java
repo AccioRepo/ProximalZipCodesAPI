@@ -9,8 +9,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.distance.model.ApiResponse;
 import com.distance.model.ZipCode;
 import com.opencsv.CSVReader;
+
 
 @Service
 public class ZipCodeService {
@@ -30,6 +32,9 @@ public class ZipCodeService {
              CSVReader csvReader = new CSVReader(reader)) {
              
             String[] nextLine;
+            // Skip the header
+            csvReader.readNext(); 
+
             while ((nextLine = csvReader.readNext()) != null) {
                 // Ensure we have valid data
                 if (nextLine.length < 3) {
@@ -62,14 +67,15 @@ public class ZipCodeService {
     }
 
     // Method to find zip codes within a specified distance from a target zip code
-    public List<String> findZipCodesWithinDistance(String targetZip, double distance) {
+    public ApiResponse findZipCodesWithinDistance(String targetZip, double distance) {
+        // Check if the provided zipcode exists
         ZipCode target = zipCodes.stream()
                 .filter(z -> z.getZipcode().equals(targetZip))
                 .findFirst()
                 .orElse(null);
 
         if (target == null) {
-            return new ArrayList<>();  // Return empty list if target zip code is not found
+            return new ApiResponse("error", "Invalid zipcode."); // Error response
         }
 
         List<String> result = new ArrayList<>();
@@ -81,6 +87,12 @@ public class ZipCodeService {
                 }
             }
         }
-        return result;
+
+        // Check if any nearby zip codes were found
+        if (result.isEmpty()) {
+            return new ApiResponse("error", "No service provider found in the desired radius. Please consider increasing your radius."); // Error response
+        }
+
+        return new ApiResponse("success", result); // Success response
     }
 }

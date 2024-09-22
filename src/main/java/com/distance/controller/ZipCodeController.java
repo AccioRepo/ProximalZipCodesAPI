@@ -1,25 +1,25 @@
 package com.distance.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.distance.model.ApiResponse;
 import com.distance.service.ZipCodeService;
 
 
 @RestController
-@RequestMapping("/api/zipcodes")
+// @RequestMapping("/api/zipcodes")
 public class ZipCodeController {
 
-    @Autowired
-    private ZipCodeService zipCodeService;
+    private final ZipCodeService zipCodeService;
 
-    @GetMapping("/nearby")
-    public List<String> getNearbyZipCodes(@RequestParam String zipcode, @RequestParam double distance) {
+    public ZipCodeController(ZipCodeService zipCodeService) {
+        this.zipCodeService = zipCodeService;
+    }
+
+    @GetMapping("/api/zipcodes/nearby")
+    public ApiResponse getNearbyZipCodes(@RequestParam String zipcode, @RequestParam double distance) {
         return zipCodeService.findZipCodesWithinDistance(zipcode, distance);
     }
 }
